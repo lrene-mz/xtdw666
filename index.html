@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>暖心提示</title>
+    <style>
+        .note {
+            position: fixed;
+            padding: 25px 35px;
+            background-color: pink;
+            border-radius: 8px;
+            font-family: "楷体", serif;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: move;
+            user-select: none;
+            min-width: 180px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .note {
+                font-size: 20px;
+                padding: 20px 25px;
+                min-width: 150px;
+                min-height: 60px;
+            }
+        }
+        body {
+            background-color: #f0f7ff;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden; /* 未确认前隐藏滚动条 */
+        }
+        audio {
+            display: none;
+        }
+        /* 弹窗样式 */
+        .gift-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .sender-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .sender-option {
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+        .sender-option:hover {
+            border-color: #ff85a2;
+            background-color: #fff5f8;
+        }
+        .sender-option.selected {
+            border-color: #ff4d7d;
+            background-color: #ffe6ec;
+        }
+        .confirm-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background-color: #ff6b8b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .confirm-btn:hover {
+            background-color: #ff4d7d;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" src=""/xtdw666/zxt.mp3"" loop>
+        您的浏览器不支持音频播放
+    </audio>
+
+    <!-- 礼物发送者选择弹窗 -->
+    <div class="gift-modal" id="giftModal">
+        <div class="modal-content">
+            <div class="modal-title">你收到了一份来自小桐大王的礼物</div>
+            <button class="confirm-btn" id="confirmBtn">确认接收</button>
+        </div>
+    </div>
+
+    <script>
+        // 选择发送者功能
+        const options = document.querySelectorAll('.sender-option');
+        let selectedSender = null;
+        
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除其他选项的选中状态
+                options.forEach(opt => opt.classList.remove('selected'));
+                // 添加当前选项的选中状态
+                option.classList.add('selected');
+                selectedSender = option.getAttribute('data-sender');
+            });
+        });
+
+        // 确认接收按钮
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if (!selectedSender) {
+                alert('请选择礼物的发送者哦~');
+                return;
+            }
+            
+            // 隐藏弹窗
+            document.getElementById('giftModal').style.display = 'none';
+            // 允许页面滚动
+            document.body.style.overflow = 'auto';
+            // 播放背景音乐（解决浏览器自动播放限制）
+            document.getElementById('bgMusic').play().catch(err => {
+                console.log('需要用户交互后才能播放音乐:', err);
+            });
+            // 生成提示框
+            generateNotes();
+        });
+
+        function createNote() {
+            const texts = [
+                '记得加衣！', '记得照顾好自己', '天天开心', 
+                '好好吃饭', '早点休息', '别感冒',
+                '要一直幸福呀～', '多喝水哦', '保持微笑😊',
+                '再忙也要照顾好自己', '今天也要元气满满', '记得想我哦',
+                `来自${selectedSender}的关心`, `${selectedSender}一直惦记着你`
+            ];
+            const text = texts[Math.floor(Math.random() * texts.length)];
+            
+            const colors = [
+                'pink', 'lightskyblue', 'lightgreen', 
+                'lavender', 'lightyellow', 'darkviolet', 'orange',
+                'paleturquoise', 'plum', 'gold'
+            ];
+            const bg = colors[Math.floor(Math.random() * colors.length)];
+            
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const left = Math.floor(Math.random() * (width - 250));
+            const top = Math.floor(Math.random() * (height - 150));
+            
+            const note = document.createElement('div');
+            note.className = 'note';
+            note.style.left = `${left}px`;
+            note.style.top = `${top}px`;
+            note.style.backgroundColor = bg;
+            note.innerText = text;
+            note.style.opacity = '0';
+            note.style.transform = 'scale(0.8)';
+            document.body.appendChild(note);
+            
+            // 淡入动画
+            setTimeout(() => {
+                note.style.opacity = '1';
+                note.style.transform = 'scale(1)';
+            }, 50);
+
+            // 鼠标拖动功能
+            let isDragging = false;
+            let offsetX, offsetY;
+            note.onmousedown = (e) => {
+                isDragging = true;
+                offsetX = e.clientX - note.getBoundingClientRect().left;
+                offsetY = e.clientY - note.getBoundingClientRect().top;
+                note.style.zIndex = '100'; // 拖动时置于顶层
+            };
+            document.onmousemove = (e) => {
+                if (isDragging) {
+                    note.style.left = `${e.clientX - offsetX}px`;
+                    note.style.top = `${e.clientY - offsetY}px`;
+                }
+            };
+            document.onmouseup = () => {
+                isDragging = false;
+                note.style.zIndex = '1'; // 结束拖动后恢复层级
+            };
+            // 移动端触摸拖动
+            note.ontouchstart = (e) => {
+                isDragging = true;
+                offsetX = e.touches[0].clientX - note.getBoundingClientRect().left;
+                offsetY = e.touches[0].clientY - note.getBoundingClientRect().top;
+                note.style.zIndex = '100';
+            };
+            document.ontouchmove = (e) => {
+                if (isDragging) {
+                    note.style.left = `${e.touches[0].clientX - offsetX}px`;
+                    note.style.top = `${e.touches[0].clientY - offsetY}px`;
+                }
+            };
+            document.ontouchend = () => {
+                isDragging = false;
+                note.style.zIndex = '1';
+            };
+        }
+
+        function generateNotes() {
+            const count = 50;
+            for (let i = 0; i < count; i++) {
+                setTimeout(createNote, i * 100);
+            }
+        }
+    </script>
+</body>
+</html>
